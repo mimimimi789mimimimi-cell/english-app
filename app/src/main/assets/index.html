@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1e3a8a">
+<meta name="description" content="中学1年生向けの英語学習アプリ。19単元の解説と選択式問題で学習できます。">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<title>中1英語マスター</title>
+<style>
+  :root {
+    --primary: #2563eb;
+    --primary-dark: #1e40af;
+    --primary-light: #eff6ff;
+    --success: #10b981;
+    --success-light: #ecfdf5;
+    --danger: #ef4444;
+    --danger-light: #fef2f2;
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --text: #0f172a;
+    --muted: #64748b;
+    --border: #e2e8f0;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding-bottom: 80px;
+  }
+  header {
+    background: linear-gradient(135deg, #1e3a8a, #2563eb);
+    color: #fff;
+    padding: 16px 18px;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    box-shadow: 0 2px 10px rgba(30,58,138,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .header-title { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.15rem; }
+  .app-badge { background: #fff; color: #1e3a8a; font-weight: 900; font-size: 0.8rem; padding: 4px 8px; border-radius: 8px; }
+  .container { max-width: 720px; margin: 0 auto; padding: 16px; }
+  .tabs { display: flex; background: #e2e8f0; padding: 4px; border-radius: 12px; margin-bottom: 16px; gap: 4px; }
+  .tab-btn { flex: 1; border: none; background: transparent; padding: 10px 8px; border-radius: 9px; font-weight: 700; font-size: 0.9rem; color: var(--muted); cursor: pointer; }
+  .tab-btn.active { background: #fff; color: var(--primary); box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+  .card { background: var(--card); border-radius: 16px; padding: 18px; box-shadow: 0 2px 8px rgba(15,23,42,0.05); border: 1px solid var(--border); margin-bottom: 14px; }
+  .unit-item { display: flex; align-items: center; justify-content: space-between; background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; margin-bottom: 10px; cursor: pointer; }
+  .unit-num { background: var(--primary-light); color: var(--primary); font-weight: 800; width: 32px; height: 32px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; margin-right: 12px; flex-shrink: 0; font-size: 0.9rem; }
+  .unit-item.cleared .unit-num { background: var(--success-light); color: var(--success); }
+  .unit-title { font-weight: 700; font-size: 0.95rem; flex: 1; }
+  .badge-status { font-size: 0.75rem; font-weight: 700; padding: 3px 8px; border-radius: 999px; margin-left: 8px; }
+  .badge-done { background: var(--success-light); color: var(--success); }
+  .badge-todo { background: #f1f5f9; color: var(--muted); }
+  .stepper { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; background: #fff; padding: 10px 14px; border-radius: 12px; border: 1px solid var(--border); font-size: 0.82rem; font-weight: 700; }
+  .step { color: var(--muted); }
+  .step.active { color: var(--primary); }
+  .step.done { color: var(--success); }
+  .section-tag { display: inline-block; background: var(--primary-light); color: var(--primary); font-weight: 800; font-size: 0.8rem; padding: 4px 10px; border-radius: 8px; margin-bottom: 8px; }
+  .formula-box { background: #f1f5f9; border-left: 4px solid var(--primary); padding: 12px 14px; border-radius: 8px; font-weight: 700; margin: 10px 0; font-size: 0.95rem; }
+  .example-box { background: #fffbeb; border: 1px solid #fde68a; padding: 14px; border-radius: 12px; margin: 10px 0; }
+  .btn { display: block; width: 100%; border: none; border-radius: 12px; padding: 14px; font-size: 1rem; font-weight: 800; cursor: pointer; text-align: center; }
+  .btn-primary { background: var(--primary); color: #fff; }
+  .btn-outline { background: #fff; color: var(--text); border: 1.5px solid var(--border); margin-top: 8px; }
+  .btn-hint { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; padding: 10px; font-size: 0.9rem; margin-bottom: 12px; }
+  .choice-btn { display: flex; align-items: center; width: 100%; text-align: left; background: #fff; border: 2px solid var(--border); border-radius: 12px; padding: 13px 14px; margin-bottom: 10px; font-size: 1rem; font-weight: 700; cursor: pointer; }
+  .choice-label { background: #f1f5f9; color: var(--text); width: 28px; height: 28px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; margin-right: 12px; font-size: 0.85rem; flex-shrink: 0; }
+  .choice-btn.correct { border-color: var(--success); background: var(--success-light); color: #065f46; }
+  .choice-btn.correct .choice-label { background: var(--success); color: #fff; }
+  .choice-btn.wrong { border-color: var(--danger); background: var(--danger-light); color: #991b1b; }
+  .choice-btn.wrong .choice-label { background: var(--danger); color: #fff; }
+  .feedback-box { border-radius: 12px; padding: 16px; margin-top: 14px; font-size: 0.94rem; }
+  .feedback-correct { background: var(--success-light); border: 1.5px solid var(--success); color: #064e3b; }
+  .feedback-wrong { background: var(--danger-light); border: 1.5px solid var(--danger); color: #7f1d1d; }
+  label { display: block; font-weight: 700; font-size: 0.88rem; margin: 10px 0 4px; }
+  input[type="text"], select, textarea { width: 100%; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 10px; font-size: 0.95rem; font-family: inherit; }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+<header>
+  <div class="header-title"><span class="app-badge">📘 EN1</span><span>中1英語マスター</span></div>
+  <div id="progressBadge" style="font-size:0.85rem; font-weight:700; background:rgba(255,255,255,0.2); padding:4px 10px; border-radius:999px;">0 / 19 完了</div>
+</header>
+<div class="container">
+  <div class="tabs">
+    <button class="tab-btn active" id="tabLearn" onclick="switchTab('learn')">📚 単元を学ぶ</button>
+    <button class="tab-btn" id="tabMaker" onclick="switchTab('maker')">✏️ 問題を作る</button>
+    <button class="tab-btn" id="tabCustom" onclick="switchTab('custom')">🎯 自作テスト</button>
+  </div>
+  <div id="viewLearn">
+    <div id="unitListArea">
+      <div class="card" style="background:linear-gradient(to right, #eff6ff, #f8fafc); border-color:#bfdbfe;">
+        <div style="font-weight:800; color:#1e3a8a; margin-bottom:4px;">学習の流れ（1問ずつじっくり）</div>
+        <div style="font-size:0.88rem; color:#334155;"> 単元を選ぶ   解説   例題   4択問題（間違えたらその場で解説！）</div>
+      </div>
+      <div id="unitListContainer"></div>
+    </div>
+    <div id="studyArea" class="hidden">
+      <button class="btn btn-outline" style="margin-bottom:12px; padding:10px;" onclick="backToUnits()"> 単元リストにもどる</button>
+      <div class="stepper">
+        <span class="step" id="st1">1. 解説</span><span>▶</span>
+        <span class="step" id="st2">2. 例題</span><span>▶</span>
+        <span class="step" id="st3">3. 問題解説</span>
+      </div>
+      <h2 id="studyUnitTitle" style="font-size:1.15rem; margin:0 0 12px;"></h2>
+      <div id="stepExplain" class="card">
+        <span class="section-tag">STEP 1：ポイント解説</span>
+        <div id="explainBody"></div>
+        <button class="btn btn-primary" style="margin-top:16px;" onclick="goStep(2)">例題を見てみる </button>
+      </div>
+      <div id="stepExample" class="card hidden">
+        <span class="section-tag">STEP 2：例題で確認</span>
+        <div id="exampleBody"></div>
+        <button class="btn btn-primary" style="margin-top:16px;" onclick="goStep(3)">本番の1問に挑戦！ </button>
+        <button class="btn btn-outline" onclick="goStep(1)"> 解説にもどる</button>
+      </div>
+      <div id="stepQuestion" class="card hidden">
+        <span class="section-tag">STEP 3：4択問題（1問勝負）</span>
+        <div id="questionPrompt" style="font-weight:700; font-size:1.05rem; margin:10px 0 14px;"></div>
+        <button class="btn btn-hint" id="hintToggleBtn" onclick="toggleHint()">💡 ヒントを見る</button>
+        <div id="hintBox" class="example-box hidden" style="margin-bottom:14px; font-size:0.9rem;"></div>
+        <div id="choicesContainer"></div>
+        <div id="feedbackContainer" class="hidden"></div>
+        <div id="afterAnswerActions" class="hidden" style="margin-top:14px;">
+          <button class="btn btn-outline" id="retryBtn" onclick="retryQuestion()">🔄 もう1度この問題に挑戦</button>
+          <button class="btn btn-primary" style="margin-top:8px;" id="nextUnitBtn" onclick="goNextUnit()">次の単元へ進む </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="viewMaker" class="hidden">
+    <div class="card">
+      <div class="section-tag">自動問題メーカー</div>
+      <h3 style="margin:4px 0 8px; font-size:1.05rem;">単元を選んで問題を自動作成</h3>
+      <label>単元を選択</label>
+      <select id="autoGenUnitSelect"></select>
+      <button class="btn btn-primary" style="margin-top:12px;" onclick="generateFromUnit()">✨ この単元の問題を作って解く</button>
+    </div>
+    <div class="card">
+      <div class="section-tag" style="background:#fef3c7; color:#92400e;">オリジナル問題作成</div>
+      <h3 style="margin:4px 0 8px; font-size:1.05rem;">自分だけの4択問題を作る</h3>
+      <label>単元名タイトル</label>
+      <input type="text" id="cUnit" placeholder="例：3人称単数の疑問文">
+      <label>問題文</label>
+      <textarea id="cQuestion" rows="2" placeholder="例：「ケンは毎日英語を勉強しますか？」&#10;( ) Ken study English every day?"></textarea>
+      <label>選択肢 ア</label><input type="text" id="cOpt0" placeholder="例：Do">
+      <label>選択肢 イ</label><input type="text" id="cOpt1" placeholder="例：Does">
+      <label>選択肢 ウ</label><input type="text" id="cOpt2" placeholder="例：Is">
+      <label>選択肢 エ</label><input type="text" id="cOpt3" placeholder="例：Are">
+      <label>正解の記号</label>
+      <select id="cAnswer"><option value="0">ア</option><option value="1">イ</option><option value="2">ウ</option><option value="3">エ</option></select>
+      <label>ヒント（任意）</label><input type="text" id="cHint" placeholder="例：主語が Ken（3人称単数）で、study は一般動詞だよ！">
+      <label>間違えた時の解説</label><textarea id="cExplain" rows="2" placeholder="例：主語が Ken の一般動詞の疑問文は Does を先頭に置きます。"></textarea>
+      <button class="btn btn-primary" style="margin-top:14px;" onclick="saveCustomQuestion()">💾 問題リストに保存する</button>
+    </div>
+  </div>
+  <div id="viewCustom" class="hidden">
+    <div class="card">
+      <h3 style="margin:0 0 6px; font-size:1.05rem;">自作＆作成した問題リスト</h3>
+      <p style="font-size:0.88rem; color:var(--muted); margin:0;">「問題を作る」で保存した問題を1問ずつ解けます。</p>
+    </div>
+    <div id="customListContainer"></div>
+  </div>
+</div>
+<script>
+const UNITS = [
+  { id: 1, title: "アルファベット大文字と小文字単語のつづり", explain: `<p>英語の文を書くときの基本ルールです。</p><div class="formula-box"> 文の最初の文字は必ず大文字にする<br> 人の名前国名曜日月「私(I)」はいつでも大文字</div>`, example: `<div class="example-box"><strong>例題：</strong>「私はケンです。」  <strong>I am Ken.</strong></div>`, question: "次のうち、大文字小文字の使い方が正しい英文はどれですか？", choices: ["i live in tokyo.", "I live in tokyo.", "I live in Tokyo.", "i live in Tokyo."], answer: 2, hint: "「私（I）」と、地名「東京（Tokyo）」の最初の文字に注目しよう！", wrongReasons: ["「私」の I と地名の Tokyo の両方が小文字です。", "文頭の I は大文字ですが、地名の Tokyo の最初も大文字にします。", "", "地名の Tokyo は大文字ですが、「私」の I も必ず大文字にします。"], explanation: "「私」を表す I と、Tokyo のような地名人名の最初の文字は必ず大文字にします。" },
+  { id: 2, title: "be動詞の肯定文（am / are / is短縮形）", explain: `<p><code>be動詞</code> は「〜です」「〜にいるある」を表し、主語によって使い分けます。</p><div class="formula-box">I  am / you複数  are / それ以外の1人1つ  is</div>`, example: `<div class="example-box"><strong>例題：</strong>「ユミは中学生です。」  Yumi ( <strong>is</strong> ) a junior high school student.</div>`, question: "次の日本語を表す英文の（ ）に入る最も適切な語を選びなさい。\n「私の父は先生です。」\nMy father ( ) a teacher.", choices: ["am", "are", "is", "do"], answer: 2, hint: "主語の My father（私の父）は、I でも you でもなく「1人の人」だよ！", wrongReasons: ["am は主語が I のときだけ使います。", "are は主語が you や複数のときに使います。", "", "do は一般動詞の疑問否定で使う語です。"], explanation: "主語の My father は「I でも you でもない1人」なので <strong>is</strong> を使います。" },
+  { id: 3, title: "be動詞の否定文疑問文答え方", explain: `<p>be動詞の文は、be動詞に not をつけたり、主語の前に出したりします。</p><div class="formula-box">否定文：isn't / aren't 疑問文：Is he 〜? / Are you 〜?</div>`, example: `<div class="example-box"><strong>例題：</strong>( <strong>Are</strong> ) you busy? — No, I'm ( <strong>not</strong> ).</div>`, question: "次の質問に対する答えとして最も適切なものを選びなさい。\nIs your sister at home now?", choices: ["Yes, she does.", "No, she isn't.", "Yes, he is.", "No, I'm not."], answer: 1, hint: "Is 〜? で聞かれているので be動詞で答えるよ。your sister は「彼女（she）」！", wrongReasons: ["Is 〜?（be動詞）で聞かれた質問には be動詞で答えます。", "", "your sister は女性なので she を使います。", "主語は your sister なので she で答えます。"], explanation: "be動詞の質問には be動詞で答え、your sister は女性1人なので <strong>No, she isn't.</strong> が正解です。" },
+  { id: 4, title: "一般動詞の肯定文（I / you / 複数主語）", explain: `<p>動作や状態を表す動詞が<strong>一般動詞</strong>です。be動詞と一緒に並べません。</p><div class="formula-box">主語 ＋ 一般動詞 〜.</div>`, example: `<div class="example-box"><strong>例題：</strong>We ( <strong>play</strong> ) baseball every day.</div>`, question: "次の日本語を表す英文の（ ）に入る最も適切なものを選びなさい。\n「私は2匹の犬を飼っています。」\nI ( ) two dogs.", choices: ["am have", "has", "have", "am"], answer: 2, hint: "「飼っている（持っている）」を表す一般動詞は have！", wrongReasons: ["am と have を一緒に並べることはできません。", "has は主語が3人称単数のときに使います。", "", "I am two dogs. では「私は2匹の犬です」になってしまいます。"], explanation: "主語が I のときは一般動詞を原形のまま使うので <strong>have</strong> が正解です。" },
+  { id: 5, title: "一般動詞の否定文疑問文（I / you / 複数主語）", explain: `<p>主語が I / you / 複数の一般動詞の文では <code>do</code> を使います。</p><div class="formula-box">否定文：don't ＋ 原形 疑問文：Do ＋ 主語 ＋ 原形?</div>`, example: `<div class="example-box"><strong>例題：</strong>( <strong>Do</strong> ) you play the piano? — Yes, I ( <strong>do</strong> ).</div>`, question: "次の日本語を表す英文の（ ）に入る最も適切な語を選びなさい。\n「私は朝食にパンを食べません。」\nI ( ) eat bread for breakfast.", choices: ["am not", "doesn't", "don't", "not"], answer: 2, hint: "eat は一般動詞！主語が I のときの否定文は？", wrongReasons: ["eat は一般動詞なので am not は使いません。", "doesn't は主語が3人称単数のときに使います。", "", "一般動詞の前に not だけを置くことはできません。"], explanation: "一般動詞 eat の否定文（主語 I）は <strong>don't</strong> を使います。" },
+  { id: 6, title: "3人称単数の現在：肯定文の動詞の変化", explain: `<p>主語が3人称単数（he / she / Ken など）で現在の文のとき、動詞に <code>-s / -es</code> をつけます。</p><div class="formula-box">play  plays / watch  watches / study  studies / have  has</div>`, example: `<div class="example-box"><strong>例題：</strong>Meg ( <strong>studies</strong> ) English after school.</div>`, question: "次の文の（ ）に入る最も適切な語を選びなさい。\nKen ( ) TV after dinner every day.", choices: ["watch", "watchs", "watches", "is watch"], answer: 2, hint: "Ken は3人称単数！watch は ch で終わるので後ろに何をつける？", wrongReasons: ["主語が Ken（3人称単数）なので -es をつける必要があります。", "ch で終わる語は s ではなく es をつけます。", "", "be動詞と一般動詞を一緒に並べることはできません。"], explanation: "ch で終わる動詞に三単現の印をつけるときは -es をつけて <strong>watches</strong> にします。" },
+  { id: 7, title: "3人称単数の現在：否定文疑問文", explain: `<p>主語が3人称単数の一般動詞の否定疑問には <code>does</code> を使い、<strong>動詞は原形に戻します</strong>。</p><div class="formula-box">否定文：doesn't ＋ 原形 疑問文：Does ＋ 主語 ＋ 原形?</div>`, example: `<div class="example-box"><strong>例題：</strong>( <strong>Does</strong> ) your brother ( <strong>play</strong> ) tennis?</div>`, question: "次の日本語を表す英文の（ ）に入る最も適切なものを1つ選んでください。\n「私の兄はサッカーをしません。」\nMy brother ( ) soccer.", choices: ["don't play", "doesn't play", "isn't play", "doesn't plays"], answer: 1, hint: "My brother は3人称単数！doesn't の後ろの動詞は原形に戻すよ。", wrongReasons: ["My brother は3人称単数なので doesn't を使います。", "", "play は一般動詞なので isn't は使いません。", "doesn't を使ったら後ろの動詞は原形（play）に戻します。"], explanation: "3人称単数の否定は <strong>doesn't ＋ 動詞の原形</strong> なので <strong>doesn't play</strong> が正解です。" },
+  { id: 8, title: "指示代名詞指示形容詞（this / that / these / those）", explain: `<p>距離と数で4つを使い分けます。</p><div class="formula-box">近い単数：this / 遠い単数：that / 近い複数：these / 遠い複数：those</div>`, example: `<div class="example-box"><strong>例題：</strong>( <strong>Those</strong> ) are my father's old cameras.</div>`, question: "次の日本語を表す英文の（ ）に入る最も適切な語を選びなさい。\n「これらはあなたの本ですか？」\nAre ( ) your books?", choices: ["this", "that", "these", "those"], answer: 2, hint: "「これら（近い＋複数）」を表す語を選ぼう！", wrongReasons: ["this は単数形です。", "that は「あれ（遠い単数）」です。", "", "those は「あれら（遠い複数）」です。"], explanation: "「これら（近い複数）」は <strong>these</strong> を使います。" },
+  { id: 9, title: "名詞の複数形（-s / -es / -ies / -ves不規則変化）", explain: `<p>2つ以上の名詞は複数形にします。</p><div class="formula-box">box  boxes / city  cities / leaf  leaves / child  children</div>`, example: `<div class="example-box"><strong>例題：</strong>I have three ( <strong>dictionaries</strong> ).</div>`, question: "次の文の（ ）に入る最も適切な語を選びなさい。\nThere are five ( ) in the park.", choices: ["child", "childs", "children", "childrens"], answer: 2, hint: "child（子ども）の複数形は不規則変化だよ！", wrongReasons: ["five とあるので複数形にします。", "child は不規則変化をする名詞です。", "", "children ですでに複数形なので s は不要です。"], explanation: "child の複数形は不規則変化で <strong>children</strong> になります。" },
+  { id: 10, title: "代名詞（主格所有格目的格独立所有格）", explain: `<p>文の役割で形が変わります（we - our - us - ours）。</p><div class="formula-box">〜は（主格） / 〜の（所有格） / 〜をに（目的格） / 〜のもの（独立所有格）</div>`, example: `<div class="example-box"><strong>例題：</strong>That is not her dictionary. It is ( <strong>mine</strong> ).</div>`, question: "次の文の（ ）に入る最も適切な語を選びなさい。\nWe like Mr. Brown, and he likes ( ), too.", choices: ["we", "our", "us", "ours"], answer: 2, hint: "動詞 likes の後ろ（〜を＝目的格）に入る形を選ぼう！", wrongReasons: ["we は主格なので動詞の後ろには置きません。", "our は所有格なので後ろに名詞が必要です。", "", "ours は「私たちのもの」です。"], explanation: "動詞の後ろには目的格を置くので、we の目的格 <strong>us</strong> が正解です。" },
+  { id: 11, title: "疑問詞（What / Who / Where / When / Why / How）", explain: `<p>疑問詞を文の先頭に置き、後ろは疑問文の語順にします。</p><div class="formula-box">What（何）/ Who（だれ）/ Where（どこ）/ When（いつ）/ Why（なぜ）/ How（どう）</div>`, example: `<div class="example-box"><strong>例題：</strong>( <strong>Where</strong> ) do you live?</div>`, question: "次の対話が成り立つように、（ ）に入る最も適切な語を選びなさい。\nA: ( ) is your birthday?\nB: It's October 10.", choices: ["Where", "Who", "When", "What"], answer: 2, hint: "答えが「10月10日」と日付になっているよ！", wrongReasons: ["Where は場所をたずねます。", "Who は人をたずねます。", "", "日付単体をたずねるときは When を使います。"], explanation: "「いつ」をたずねる疑問詞 <strong>When</strong> が正解です。" },
+  { id: 12, title: "How ＋ 形容詞副詞（How old / How many / How often など）", explain: `<p>How の後ろに語をつけて年齢数頻度などをたずねます。</p><div class="formula-box">How old（何歳）/ How many ＋ 複数名詞（いくつ）/ How much（いくら）/ How often（どのくらいの頻度で）</div>`, example: `<div class="example-box"><strong>例題：</strong>( <strong>How often</strong> ) do you go to the park?</div>`, question: "次の対話が成り立つように、（ ）に入る最も適切なものを選びなさい。\nA: ( ) CDs do you have?\nB: I have twenty.", choices: ["How old", "How much", "How many", "How often"], answer: 2, hint: "後ろに CDs（複数名詞）が続いているよ！", wrongReasons: ["How old は年齢をたずねます。", "CDs のような数えられる複数名詞には How many を使います。", "", "How often は頻度をたずねます。"], explanation: "数をたずねる <strong>How many ＋ 複数名詞</strong> が正解です。" },
+  { id: 13, title: "命令文Let's 〜（肯定否定Please）", explain: `<p>指示禁止お誘いを表す文です。</p><div class="formula-box">肯定：動詞の原形 〜 / 否定：Don't ＋ 動詞の原形 〜 / お誘い：Let's ＋ 動詞の原形 〜</div>`, example: `<div class="example-box"><strong>例題：</strong>( <strong>Be</strong> ) quiet in the library.</div>`, question: "次の日本語を表す英文の（ ）に入る最も適切なものを選びなさい。\n「公園で走らないでください。」\nPlease ( ) in the park.", choices: ["not run", "don't run", "no run", "doesn't run"], answer: 1, hint: "「〜しないで」は動詞の原形の前に Don't を置くよ！", wrongReasons: ["not ではなく don't を使います。", "", "no run ではなく don't run にします。", "命令文では必ず don't を使います。"], explanation: "禁止の命令文は Please の後ろに <strong>don't ＋ 動詞の原形</strong> を続けます。" },
+  { id: 14, title: "現在進行形（be動詞 ＋ 〜ing-ingのつづり）", explain: `<p>「今〜しているところです」を表す形です。</p><div class="formula-box">主語 ＋ be動詞 ＋ 動詞のing形（make  making / run  running）</div>`, example: `<div class="example-box"><strong>例題：</strong>My brother ( <strong>is watching</strong> ) TV now.</div>`, question: "次の文の（ ）に入る最も適切な語を選びなさい。\nMy mother is ( ) dinner in the kitchen now.", choices: ["make", "makeing", "making", "makes"], answer: 2, hint: "e で終わる動詞に ing をつけるときは e をとるよ！", wrongReasons: ["前に is があるので -ing形にします。", "make の e を消してから ing をつけます。", "", "三単現ではなく現在進行形にします。"], explanation: "make は語尾の e をとって ing をつけるので <strong>making</strong> が正解です。" },
+  { id: 15, title: "can（可能許可依頼否定文疑問文）", explain: `<p>助動詞 <code>can</code> の後ろは必ず動詞の原形にします。</p><div class="formula-box">主語 ＋ can ＋ 動詞の原形 〜.</div>`, example: `<div class="example-box"><strong>例題：</strong>Yumi ( <strong>can swim</strong> ) well.</div>`, question: "次の文の（ ）に入る最も適切なものを選びなさい。\nKen can ( ) the guitar very well.", choices: ["plays", "playing", "play", "to play"], answer: 2, hint: "can の後ろの動詞は主語が Ken でも必ず原形！", wrongReasons: ["can があるので s はつけません。", "can の後ろは原形にします。", "", "can の後ろに to は不要です。"], explanation: "助動詞 can の後ろは必ず<strong>動詞の原形</strong>なので <strong>play</strong> が正解です。" },
+  { id: 16, title: "前置詞（場所：in / on / under / by と 時：at / on / in）", explain: `<p>時や場所を表す前置詞の使い分けです。</p><div class="formula-box">at ＋ 時刻 / on ＋ 曜日日付 / in ＋ 月季節年</div>`, example: `<div class="example-box"><strong>例題：</strong>I play tennis ( <strong>on</strong> ) Sundays.</div>`, question: "次の日本語を表す英文の（ ）に入る最も適切な語を選びなさい。\n「私は毎朝6時に起きます。」\nI get up ( ) six every morning.", choices: ["in", "on", "at", "under"], answer: 2, hint: "「6時に」という時刻の前につける前置詞は？", wrongReasons: ["in は月や季節などに使います。", "on は曜日や日付に使います。", "", "under は「〜の下に」という場所の前置詞です。"], explanation: "具体的な時刻の前には <strong>at</strong> を使います。" },
+  { id: 17, title: "There is / are 〜 構文（〜があるいる）", explain: `<p>「〜があるいる」を表し、すぐ後ろの名詞が単数なら is、複数なら are を使います。</p><div class="formula-box">There is ＋ 単数名詞 / There are ＋ 複数名詞</div>`, example: `<div class="example-box"><strong>例題：</strong>There ( <strong>are</strong> ) many books on the desk.</div>`, question: "次の文の（ ）に入る最も適切な語を選びなさい。\nThere ( ) a cat and two dogs under the table.", choices: ["am", "is", "are", "be"], answer: 1, hint: "すぐ後ろに来る名詞（a cat＝単数）に合わせて決まるよ！", wrongReasons: ["There 構文では am は使いません。", "", "直後の名詞が a cat（単数）なので is に合わせます。", "現在形の be動詞を入れます。"], explanation: "すぐ後ろの名詞が <strong>a cat（単数）</strong> なので <strong>is</strong> が正解です。" },
+  { id: 18, title: "過去形：be動詞（was / were否定文疑問文）", explain: `<p>過去の「〜でしたいました」は be動詞を過去形にします。</p><div class="formula-box">am / is  was / are  were</div>`, example: `<div class="example-box"><strong>例題：</strong>I ( <strong>was</strong> ) busy yesterday.</div>`, question: "次の日本語を表す英文の（ ）に入る最も適切な語を選びなさい。\n「彼らは昨日公園にいました。」\nThey ( ) in the park yesterday.", choices: ["was", "were", "are", "did"], answer: 1, hint: "yesterday（昨日）があるから過去形！主語は They（複数）だよ。", wrongReasons: ["was は単数主語のときに使います。", "", "yesterday があるので過去形にします。", "「いた」は be動詞の過去形を使います。"], explanation: "主語が They（複数）の過去形なので <strong>were</strong> が正解です。" },
+  { id: 19, title: "過去形：一般動詞（規則動詞 -ed不規則動詞didn't / Did）", explain: `<p>過去の動作は動詞を過去形にし、否定疑問では <code>did</code> を使って動詞を原形に戻します。</p><div class="formula-box">go  went / have  had / 否定：didn't ＋ 原形 / 疑問：Did ＋ 主語 ＋ 原形?</div>`, example: `<div class="example-box"><strong>例題：</strong>I ( <strong>went</strong> ) to Kyoto yesterday.</div>`, question: "次の日本語を表す英文の（ ）に入る最も適切なものを選びなさい。\n「あなたは昨日テニスをしましたか？」\n( ) you ( ) tennis yesterday?", choices: ["Do / play", "Did / played", "Did / play", "Were / play"], answer: 2, hint: "Did を使ったら後ろの動詞は原形に戻すのが鉄則！", wrongReasons: ["yesterday があるので過去形の Did を使います。", "Did を使ったら後ろの動詞は原形（play）に戻します。", "", "play は一般動詞なので Did を使います。"], explanation: "過去の一般動詞の疑問文は <strong>Did ＋ 主語 ＋ 動詞の原形</strong> なので <strong>Did / play</strong> が正解です。" }
+];
+
+let clearedUnits = JSON.parse(localStorage.getItem("jh1_cleared") || "[]");
+let customQuestions = JSON.parse(localStorage.getItem("jh1_custom") || "[]");
+let currentUnit = null;
+let answeredCurrent = false;
+
+function saveState() {
+  localStorage.setItem("jh1_cleared", JSON.stringify(clearedUnits));
+  localStorage.setItem("jh1_custom", JSON.stringify(customQuestions));
+  updateProgress();
+}
+function updateProgress() {
+  document.getElementById("progressBadge").textContent = `${clearedUnits.length} / ${UNITS.length} 完了`;
+}
+function switchTab(tab) {
+  ["learn", "maker", "custom"].forEach(t => {
+    document.getElementById("tab" + t.charAt(0).toUpperCase() + t.slice(1)).classList.toggle("active", tab === t);
+    document.getElementById("view" + t.charAt(0).toUpperCase() + t.slice(1)).classList.toggle("hidden", tab !== t);
+  });
+  if (tab === "learn") renderUnitList();
+  if (tab === "custom") renderCustomList();
+}
+function renderUnitList() {
+  const container = document.getElementById("unitListContainer");
+  container.innerHTML = "";
+  UNITS.forEach(u => {
+    const isDone = clearedUnits.includes(u.id);
+    const div = document.createElement("div");
+    div.className = "unit-item" + (isDone ? " cleared" : "");
+    div.onclick = () => startUnit(u.id);
+    div.innerHTML = `<span class="unit-num">${isDone ? "✓" : u.id}</span><span class="unit-title">${u.title}</span><span class="badge-status ${isDone ? "badge-done" : "badge-todo"}">${isDone ? "クリア済" : "学習する"}</span>`;
+    container.appendChild(div);
+  });
+}
+function startUnit(unitId) {
+  currentUnit = UNITS.find(u => u.id === unitId);
+  if (!currentUnit) return;
+  document.getElementById("unitListArea").classList.add("hidden");
+  document.getElementById("studyArea").classList.remove("hidden");
+  document.getElementById("studyUnitTitle").textContent = `単元 ${currentUnit.id}：${currentUnit.title}`;
+  document.getElementById("explainBody").innerHTML = currentUnit.explain;
+  document.getElementById("exampleBody").innerHTML = currentUnit.example;
+  setupQuestionUI(currentUnit);
+  goStep(1);
+}
+function backToUnits() {
+  document.getElementById("studyArea").classList.add("hidden");
+  document.getElementById("unitListArea").classList.remove("hidden");
+  renderUnitList();
+}
+function goStep(stepNum) {
+  document.getElementById("stepExplain").classList.toggle("hidden", stepNum !== 1);
+  document.getElementById("stepExample").classList.toggle("hidden", stepNum !== 2);
+  document.getElementById("stepQuestion").classList.toggle("hidden", stepNum !== 3);
+  ["st1", "st2", "st3"].forEach((id, idx) => {
+    const el = document.getElementById(id);
+    el.classList.remove("active", "done");
+    if (idx + 1 < stepNum) el.classList.add("done");
+    if (idx + 1 === stepNum) el.classList.add("active");
+  });
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+function setupQuestionUI(qObj) {
+  answeredCurrent = false;
+  document.getElementById("questionPrompt").innerHTML = qObj.question.replace(/\n/g, "<br>");
+  document.getElementById("hintBox").classList.add("hidden");
+  document.getElementById("hintBox").innerHTML = `💡 <strong>ヒント：</strong>${qObj.hint || "解説のポイントを思い出してみよう！"}`;
+  document.getElementById("feedbackContainer").classList.add("hidden");
+  document.getElementById("afterAnswerActions").classList.add("hidden");
+  const labels = ["ア", "イ", "ウ", "エ"];
+  const container = document.getElementById("choicesContainer");
+  container.innerHTML = "";
+  qObj.choices.forEach((choice, idx) => {
+    const btn = document.createElement("button");
+    btn.className = "choice-btn";
+    btn.id = `choice_${idx}`;
+    btn.onclick = () => checkAnswer(idx, qObj);
+    btn.innerHTML = `<span class="choice-label">${labels[idx]}</span><span>${choice}</span>`;
+    container.appendChild(btn);
+  });
+}
+function toggleHint() { document.getElementById("hintBox").classList.toggle("hidden"); }
+function checkAnswer(selectedIdx, qObj) {
+  if (answeredCurrent) return;
+  answeredCurrent = true;
+  const labels = ["ア", "イ", "ウ", "エ"];
+  const isCorrect = selectedIdx === qObj.answer;
+  document.getElementById(`choice_${selectedIdx}`).classList.add(isCorrect ? "correct" : "wrong");
+  if (!isCorrect) document.getElementById(`choice_${qObj.answer}`).classList.add("correct");
+  if (isCorrect && qObj.id && !clearedUnits.includes(qObj.id)) {
+    clearedUnits.push(qObj.id);
+    saveState();
+  }
+  const fb = document.getElementById("feedbackContainer");
+  fb.classList.remove("hidden");
+  if (isCorrect) {
+    fb.innerHTML = `<div class="feedback-box feedback-correct"><div style="font-weight:800; font-size:1.05rem; margin-bottom:6px;">⭕ 正解！バッチリです！</div><div>${qObj.explanation}</div></div>`;
+  } else {
+    const specificReason = (qObj.wrongReasons && qObj.wrongReasons[selectedIdx]) ? `<p style="margin:6px 0;"><strong>選んだ「${labels[selectedIdx]}」がまちがいな理由：</strong><br>${qObj.wrongReasons[selectedIdx]}</p>` : "";
+    fb.innerHTML = `<div class="feedback-box feedback-wrong"><div style="font-weight:800; font-size:1.05rem; margin-bottom:6px;">❌ おしい！正解は「${labels[qObj.answer]}：${qObj.choices[qObj.answer]}」</div>${specificReason}<p style="margin:6px 0 0;"><strong>ポイント解説：</strong><br>${qObj.explanation}</p></div>`;
+  }
+  document.getElementById("afterAnswerActions").classList.remove("hidden");
+  document.getElementById("nextUnitBtn").style.display = (qObj.id && qObj.id < UNITS.length) ? "block" : "none";
+}
+function retryQuestion() { if (currentUnit) setupQuestionUI(currentUnit); }
+function goNextUnit() { if (currentUnit && currentUnit.id < UNITS.length) startUnit(currentUnit.id + 1); }
+function initMakerSelect() {
+  const sel = document.getElementById("autoGenUnitSelect");
+  UNITS.forEach(u => {
+    const opt = document.createElement("option");
+    opt.value = u.id;
+    opt.textContent = `${u.id}. ${u.title}`;
+    sel.appendChild(opt);
+  });
+}
+function generateFromUnit() {
+  const uid = parseInt(document.getElementById("autoGenUnitSelect").value, 10);
+  switchTab("learn");
+  startUnit(uid);
+  goStep(3);
+}
+function saveCustomQuestion() {
+  const title = document.getElementById("cUnit").value.trim() || "オリジナル問題";
+  const question = document.getElementById("cQuestion").value.trim();
+  const choices = [0,1,2,3].map(i => document.getElementById("cOpt"+i).value.trim());
+  const answer = parseInt(document.getElementById("cAnswer").value, 10);
+  const hint = document.getElementById("cHint").value.trim() || "主語と動詞の形をよく見てみよう！";
+  const explanation = document.getElementById("cExplain").value.trim() || "正解の選択肢を確認しよう！";
+  if (!question || choices.some(o => !o)) { alert("問題文と4つの選択肢をすべて入力してください。"); return; }
+  customQuestions.unshift({ title, question, choices, answer, hint, explanation });
+  saveState();
+  ["cUnit","cQuestion","cOpt0","cOpt1","cOpt2","cOpt3","cHint","cExplain"].forEach(id => document.getElementById(id).value = "");
+  alert("保存しました！");
+  switchTab("custom");
+}
+function renderCustomList() {
+  const container = document.getElementById("customListContainer");
+  if (customQuestions.length === 0) {
+    container.innerHTML = `<div class="card" style="text-align:center; color:var(--muted);">まだ自作問題がありません。</div>`;
+    return;
+  }
+  container.innerHTML = "";
+  customQuestions.forEach((cq, idx) => {
+    const div = document.createElement("div");
+    div.className = "card";
+    div.innerHTML = `<div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span class="section-tag" style="margin:0;">${cq.title}</span><button onclick="deleteCustom(${idx})" style="border:none; background:none; color:#ef4444; font-weight:700;">削除</button></div><div style="font-weight:700; margin-bottom:10px;">${cq.question.replace(/\n/g, "<br>")}</div><button class="btn btn-primary" style="padding:10px;" onclick="playCustom(${idx})">この問題を解く </button>`;
+    container.appendChild(div);
+  });
+}
+function deleteCustom(idx) { customQuestions.splice(idx, 1); saveState(); renderCustomList(); }
+function playCustom(idx) {
+  const cq = customQuestions[idx];
+  switchTab("learn");
+  document.getElementById("unitListArea").classList.add("hidden");
+  document.getElementById("studyArea").classList.remove("hidden");
+  document.getElementById("studyUnitTitle").textContent = `自作問題：${cq.title}`;
+  setupQuestionUI(cq);
+  goStep(3);
+}
+updateProgress();
+renderUnitList();
+initMakerSelect();
+</script>
+
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js").catch(err => {
+      console.warn("オフライン機能の登録に失敗しました:", err);
+    });
+  });
+}
+</script>
+</body>
+</html>
+
